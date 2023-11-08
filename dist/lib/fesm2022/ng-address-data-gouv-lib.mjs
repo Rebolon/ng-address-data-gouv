@@ -1,12 +1,9 @@
 import * as i0 from '@angular/core';
-import { Injectable, Component, Input, Output, NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Injectable, inject, Component, Input, Output } from '@angular/core';
 import * as i1 from '@angular/common/http';
-import { HttpParams, HttpHeaders, HttpClientModule } from '@angular/common/http';
+import { HttpParams, HttpHeaders, HttpClient, HttpClientModule } from '@angular/common/http';
 import { EMPTY, map, shareReplay, BehaviorSubject, Subject, filter, ReplaySubject, takeUntil, debounceTime, switchMap } from 'rxjs';
-import * as i2 from '@angular/common';
-import { CommonModule } from '@angular/common';
-import { BrowserModule } from '@angular/platform-browser';
-import { createCustomElement } from '@angular/elements';
+import { NgStyle, AsyncPipe, CommonModule, NgFor } from '@angular/common';
 
 class Service {
     /**
@@ -46,19 +43,19 @@ class Service {
     search(text, limit = 5, type = 'housenumber', autocomplete = 0) {
         return this.get({ q: text, limit, type, autocomplete });
     }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "17.0.1", ngImport: i0, type: Service, deps: [{ token: i1.HttpClient }], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "17.0.1", ngImport: i0, type: Service, providedIn: 'root' }); }
 }
-Service.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: Service, deps: [{ token: i1.HttpClient }], target: i0.ɵɵFactoryTarget.Injectable });
-Service.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: Service, providedIn: 'root' });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: Service, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "17.0.1", ngImport: i0, type: Service, decorators: [{
             type: Injectable,
             args: [{
                     providedIn: 'root'
                 }]
-        }], ctorParameters: function () { return [{ type: i1.HttpClient }]; } });
+        }], ctorParameters: () => [{ type: i1.HttpClient }] });
 
 class AddressSearchComponent {
-    constructor(service) {
-        this.service = service;
+    constructor() {
+        this.service = inject(Service);
         // data store containers
         this.selectedAddress$ = new BehaviorSubject({});
         this.listAddresses$ = new Subject();
@@ -115,12 +112,14 @@ class AddressSearchComponent {
         // change value of the input
         this.inputValue.next(address.properties.label);
     }
-}
-AddressSearchComponent.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: AddressSearchComponent, deps: [{ token: Service }], target: i0.ɵɵFactoryTarget.Component });
-AddressSearchComponent.ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "15.2.9", type: AddressSearchComponent, selector: "ng-address-data-gouv-search", inputs: { loaderSize: "loaderSize", width: "width", placeholder: "placeholder", label: "label", id: "id", uri: "uri" }, outputs: { isLoading: "isLoading", addressFound: "addressFound" }, providers: [
-        Service
-    ], ngImport: i0, template: `
-    <label for="{{id}}" *ngIf="label">{{label}}</label>
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "17.0.1", ngImport: i0, type: AddressSearchComponent, deps: [], target: i0.ɵɵFactoryTarget.Component }); }
+    static { this.ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "17.0.0", version: "17.0.1", type: AddressSearchComponent, isStandalone: true, selector: "ng-address-data-gouv-search", inputs: { loaderSize: "loaderSize", width: "width", placeholder: "placeholder", label: "label", id: "id", uri: "uri" }, outputs: { isLoading: "isLoading", addressFound: "addressFound" }, providers: [
+            HttpClient,
+            Service
+        ], ngImport: i0, template: `
+  @if (id) {
+    <label for="{{id}}">{{label}}</label>
+  }
     <input 
       id="{{id}}" 
       [placeholder]="placeholder" 
@@ -128,16 +127,20 @@ AddressSearchComponent.ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0",
       [value]="inputValue | async"
       (keyup)="onKeyUp($event)">
     <ul [ngStyle]="{ 'width': width+'px', 'border': (listAddressesForStylish | async) ? '0.2px solid #ccc' : '0px' }">
-       <li *ngFor="let addressList of listAddresses | async; let isOdd = odd;"
-           (click)="selectAddress(addressList)"
+      @for (addressList of listAddresses | async; track addressList; let isOdd = $odd) {
+       <li (click)="selectAddress(addressList)"
            [ngStyle]="{ 'background-color': isOdd ? '#fafafa' : '#f0f0f0'}"><span>{{addressList.properties.label}}</span>
        </li>
+      }
     </ul>
-  `, isInline: true, styles: ["input{border:.2px solid #ccc}ul{-webkit-padding-start:0px;padding-inline-start:0px;-webkit-margin-before:0em;margin-block-start:0em}li{list-style-type:none;cursor:pointer}li:hover{padding-left:5px}\n"], dependencies: [{ kind: "directive", type: i2.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i2.NgStyle, selector: "[ngStyle]", inputs: ["ngStyle"] }, { kind: "pipe", type: i2.AsyncPipe, name: "async" }] });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: AddressSearchComponent, decorators: [{
+  `, isInline: true, styles: ["input{border:.2px solid #ccc}ul{padding-inline-start:0px;margin-block-start:0em}li{list-style-type:none;cursor:pointer}li:hover{padding-left:5px}\n"], dependencies: [{ kind: "directive", type: NgStyle, selector: "[ngStyle]", inputs: ["ngStyle"] }, { kind: "pipe", type: AsyncPipe, name: "async" }, { kind: "ngmodule", type: CommonModule }, { kind: "ngmodule", type: HttpClientModule }] }); }
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "17.0.1", ngImport: i0, type: AddressSearchComponent, decorators: [{
             type: Component,
-            args: [{ selector: 'ng-address-data-gouv-search', template: `
-    <label for="{{id}}" *ngIf="label">{{label}}</label>
+            args: [{ standalone: true, imports: [NgStyle, NgFor, AsyncPipe, CommonModule, HttpClientModule,], selector: 'ng-address-data-gouv-search', template: `
+  @if (id) {
+    <label for="{{id}}">{{label}}</label>
+  }
     <input 
       id="{{id}}" 
       [placeholder]="placeholder" 
@@ -145,15 +148,17 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImpor
       [value]="inputValue | async"
       (keyup)="onKeyUp($event)">
     <ul [ngStyle]="{ 'width': width+'px', 'border': (listAddressesForStylish | async) ? '0.2px solid #ccc' : '0px' }">
-       <li *ngFor="let addressList of listAddresses | async; let isOdd = odd;"
-           (click)="selectAddress(addressList)"
+      @for (addressList of listAddresses | async; track addressList; let isOdd = $odd) {
+       <li (click)="selectAddress(addressList)"
            [ngStyle]="{ 'background-color': isOdd ? '#fafafa' : '#f0f0f0'}"><span>{{addressList.properties.label}}</span>
        </li>
+      }
     </ul>
   `, providers: [
+                        HttpClient,
                         Service
-                    ], styles: ["input{border:.2px solid #ccc}ul{-webkit-padding-start:0px;padding-inline-start:0px;-webkit-margin-before:0em;margin-block-start:0em}li{list-style-type:none;cursor:pointer}li:hover{padding-left:5px}\n"] }]
-        }], ctorParameters: function () { return [{ type: Service }]; }, propDecorators: { loaderSize: [{
+                    ], styles: ["input{border:.2px solid #ccc}ul{padding-inline-start:0px;margin-block-start:0em}li{list-style-type:none;cursor:pointer}li:hover{padding-left:5px}\n"] }]
+        }], propDecorators: { loaderSize: [{
                 type: Input
             }], width: [{
                 type: Input
@@ -171,46 +176,6 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImpor
                 type: Output
             }] } });
 
-class NgAddressDataGouvModule {
-    constructor(injector) {
-        this.injector = injector;
-    }
-    /* for standalone components */
-    ngDoBootstrap() {
-        const elRiAd = createCustomElement(AddressSearchComponent, { injector: this.injector });
-        customElements.define('ng-address-data-gouv-search', elRiAd);
-    }
-}
-NgAddressDataGouvModule.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: NgAddressDataGouvModule, deps: [{ token: i0.Injector }], target: i0.ɵɵFactoryTarget.NgModule });
-NgAddressDataGouvModule.ɵmod = i0.ɵɵngDeclareNgModule({ minVersion: "14.0.0", version: "15.2.9", ngImport: i0, type: NgAddressDataGouvModule, declarations: [AddressSearchComponent], imports: [BrowserModule,
-        CommonModule,
-        HttpClientModule], exports: [AddressSearchComponent] });
-NgAddressDataGouvModule.ɵinj = i0.ɵɵngDeclareInjector({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: NgAddressDataGouvModule, imports: [BrowserModule,
-        CommonModule,
-        HttpClientModule] });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImport: i0, type: NgAddressDataGouvModule, decorators: [{
-            type: NgModule,
-            args: [{
-                    declarations: [
-                        AddressSearchComponent
-                    ],
-                    imports: [
-                        BrowserModule,
-                        CommonModule,
-                        HttpClientModule,
-                    ],
-                    exports: [
-                        AddressSearchComponent
-                    ],
-                    schemas: [
-                        CUSTOM_ELEMENTS_SCHEMA
-                    ],
-                    entryComponents: [
-                        AddressSearchComponent,
-                    ],
-                }]
-        }], ctorParameters: function () { return [{ type: i0.Injector }]; } });
-
 /*
  * Public API Surface of ng-address-data-gouv
  */
@@ -219,5 +184,5 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "15.2.9", ngImpor
  * Generated bundle index. Do not edit.
  */
 
-export { AddressSearchComponent, NgAddressDataGouvModule, Service };
+export { AddressSearchComponent, Service };
 //# sourceMappingURL=ng-address-data-gouv-lib.mjs.map
